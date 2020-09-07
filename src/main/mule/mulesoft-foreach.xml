@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0dcd9b56-e292-4376-9606-c48af8c25cf3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mulesoft-foreachFlow" doc:id="7e22aebf-32b9-45c0-9daa-c3915bc90a47" >
+		<http:listener doc:name="Listener" doc:id="8705ed75-8d78-48ac-a121-64cad8ae7cf6" config-ref="HTTP_Listener_config" path="/foreach"/>
+		<ee:transform doc:name="Transform Message" doc:id="311f79af-d861-4198-bc98-5fc405ab55a1" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="array" ><![CDATA[[1,2,3,4,5]]]></ee:set-variable>
+				<ee:set-variable variableName="result" ><![CDATA[0]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="9213f8dc-700d-4915-92a6-5e24bb4baf0b" collection="#[vars.result]">
+			<ee:transform doc:name="Transform Message" doc:id="e022e2d8-12fd-46e7-b8f8-a775f1791569" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="result" ><![CDATA[vars.result + payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="5b8c53bc-1db0-44ac-aabd-14ca24915672" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	result: vars.result
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="706301db-0fc1-43a5-a2d1-e0674424e1f7" message="#[vars.result]"/>
+	</flow>
+</mule>
